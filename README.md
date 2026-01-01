@@ -110,7 +110,7 @@ The system runs as a single backend application with strict tenant scoping enfor
 ---
 
 ## Repository Structure
-
+```
 multi-tenant-saas-platform/
 ├── apps/
 │ ├── frontend/ # React + TypeScript frontend
@@ -123,6 +123,7 @@ multi-tenant-saas-platform/
 ├── infra/ # AWS & infrastructure configuration
 ├── docker-compose.yml # One-command local setup
 └── README.md
+```
 
 The repository is structured as a monorepo to keep frontend, backend, and infrastructure concerns aligned.
 

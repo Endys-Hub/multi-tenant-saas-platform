@@ -1,0 +1,60 @@
+# =====================
+# Node.js
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =====================
+# Build output
+# =====================
+dist/
+build/
+.out/
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.*
+!.env.example
+
+# =====================
+# Prisma
+# =====================
+prisma/migrations/
+apps/backend/prisma/migrations/
+
+# =====================
+# Logs
+# =====================
+logs/
+*.log
+
+# =====================
+# Docker
+# =====================
+docker-data/
+.pgdata/
+pgdata/
+
+# =====================
+# OS / Editor
+# =====================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =====================
+# Testing / Coverage
+# =====================
+coverage/
+
+# =====================
+# Misc
+# =====================
+tmp/
+
+tree.txt

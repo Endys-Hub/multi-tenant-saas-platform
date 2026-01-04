@@ -1,0 +1,17 @@
+import { PERMISSIONS, Permission } from "./permissions";
+
+export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
+  ORG_ADMIN: [
+    PERMISSIONS.ORG_READ,
+    PERMISSIONS.ORG_UPDATE,
+    PERMISSIONS.USER_READ,
+    PERMISSIONS.USER_INVITE,
+    PERMISSIONS.BILLING_READ,
+    PERMISSIONS.BILLING_UPDATE,
+  ],
+
+  MEMBER: [
+    PERMISSIONS.ORG_READ,
+    PERMISSIONS.USER_READ,
+  ],
+};

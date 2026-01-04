@@ -9,7 +9,7 @@ RUN npm install
 COPY prisma ./prisma
 
 # Generate Prisma Client
-RUN npx prisma generate
+# RUN npx prisma generate
 
 # Copy source code
 COPY src ./src

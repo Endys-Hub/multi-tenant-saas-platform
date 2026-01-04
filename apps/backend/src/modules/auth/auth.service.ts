@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { hashPassword, verifyPassword } from "../../utils/password";
 
 const prisma = new PrismaClient();
@@ -10,7 +10,7 @@ export const signup = async (
 ) => {
   const hashedPassword = await hashPassword(password);
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const user = await tx.user.create({
       data: {
         email,
@@ -53,4 +53,6 @@ export const login = async (email: string, password: string) => {
 
   return user;
 };
+
+
 

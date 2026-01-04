@@ -22,6 +22,7 @@ model Organization {
   createdAt DateTime @default(now())
 
   memberships Membership[]
+  invitations Invitation[]
 }
 
 model Membership {
@@ -34,4 +35,18 @@ model Membership {
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([userId, organizationId])
+}
+
+model Invitation {
+  id              String   @id @default(uuid())
+  email           String
+  organizationId  String
+  role            String
+  token           String   @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
 }

@@ -12,6 +12,11 @@ export const buildApp = () => {
 
   app.get("/health", async () => ({ status: "ok" }));
 
+  app.ready(() => {
+  console.log(app.printRoutes());
+});
+
+
   return app;
 };
 

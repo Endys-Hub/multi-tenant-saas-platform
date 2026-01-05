@@ -14,6 +14,7 @@ model User {
   createdAt DateTime @default(now())
 
   memberships Membership[]
+  auditLogs    AuditLog[]
 }
 
 model Organization {
@@ -23,6 +24,7 @@ model Organization {
 
   memberships Membership[]
   invitations Invitation[]
+  auditLogs    AuditLog[]
 }
 
 model Membership {
@@ -50,3 +52,18 @@ model Invitation {
 
   createdAt DateTime @default(now())
 }
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String?
+  action         String
+  entity         String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+}
+

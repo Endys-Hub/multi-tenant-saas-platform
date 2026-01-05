@@ -1,7 +1,7 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../../utils/prisma";
 import { hashPassword, verifyPassword } from "../../utils/password";
-
-const prisma = new PrismaClient();
+import { logAudit } from "../../utils/audit";
 
 export const signup = async (
   email: string,
@@ -10,30 +10,41 @@ export const signup = async (
 ) => {
   const hashedPassword = await hashPassword(password);
 
-  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const user = await tx.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-    });
+  const result = await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+        },
+      });
 
-    const organization = await tx.organization.create({
-      data: {
-        name: organizationName,
-      },
-    });
+      const organization = await tx.organization.create({
+        data: {
+          name: organizationName,
+        },
+      });
 
-    await tx.membership.create({
-      data: {
-        userId: user.id,
-        organizationId: organization.id,
-        role: "ORG_ADMIN",
-      },
-    });
+      await tx.membership.create({
+        data: {
+          userId: user.id,
+          organizationId: organization.id,
+          role: "ORG_ADMIN",
+        },
+      });
 
-    return { user, organization };
+      return { user, organization };
+    }
+  );
+
+  await logAudit({
+    organizationId: result.organization.id,
+    userId: result.user.id,
+    action: "ORG_CREATED",
+    entity: "Organization",
   });
+
+  return result;
 };
 
 export const login = async (email: string, password: string) => {

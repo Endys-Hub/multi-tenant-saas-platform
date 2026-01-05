@@ -1,3 +1,4 @@
+import { logAudit } from "../../utils/audit";
 import { Prisma } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { prisma } from "../../utils/prisma";
@@ -57,6 +58,15 @@ export const acceptInviteRoutes = async (app: FastifyInstance) => {
       await tx.invitation.update({
         where: { id: invite.id },
         data: { acceptedAt: new Date() },
+      });
+
+      // AUDIT LOG — AFTER SUCCESSFUL ACCEPTANCE
+      await logAudit({
+        organizationId: invite.organizationId,
+        userId: user.id,
+        action: "INVITE_ACCEPTED",
+        entity: "Invitation",
+        entityId: invite.id,
       });
 
       return { success: true };

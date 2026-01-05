@@ -1,3 +1,4 @@
+import { logAudit } from "../../utils/audit";
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import crypto from "crypto";
@@ -32,6 +33,18 @@ export const inviteRoutes = async (app: FastifyInstance) => {
           token,
           organizationId: request.auth.organizationId,
           expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24h
+        },
+      });
+
+      await logAudit({
+        organizationId: request.auth.organizationId,
+        userId: request.auth.userId,
+        action: "INVITE_CREATED",
+        entity: "Invitation",
+        entityId: invitation.id,
+        metadata: {
+          email: body.email,
+          role: body.role,
         },
       });
 

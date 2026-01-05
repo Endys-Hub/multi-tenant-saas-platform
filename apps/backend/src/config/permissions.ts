@@ -5,6 +5,8 @@ export const PERMISSIONS = {
   USER_READ: "user:read",
   USER_INVITE: "user:invite",
 
+  AUDIT_READ: "audit:read",
+
   BILLING_READ: "billing:read",
   BILLING_UPDATE: "billing:update",
 } as const;

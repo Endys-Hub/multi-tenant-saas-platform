@@ -33,6 +33,15 @@ export const signup = async (
         },
       });
 
+      await tx.subscription.create({
+        data: {
+          organizationId: organization.id,
+          plan: "FREE",
+          status: "TRIALING",
+          trialEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14), // 14 days
+        },
+      });
+
       return { user, organization };
     }
   );

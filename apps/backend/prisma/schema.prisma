@@ -25,6 +25,7 @@ model Organization {
   memberships Membership[]
   invitations Invitation[]
   auditLogs    AuditLog[]
+  subscription  Subscription?
 }
 
 model Membership {
@@ -67,3 +68,25 @@ model AuditLog {
   user         User?        @relation(fields: [userId], references: [id])
 }
 
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  CANCELED
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+model Subscription {
+  id             String              @id @default(uuid())
+  organizationId String              @unique
+  plan           Plan
+  status         SubscriptionStatus
+  trialEndsAt    DateTime?
+  startedAt      DateTime @default(now())
+  canceledAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+}

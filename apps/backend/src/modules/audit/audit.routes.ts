@@ -3,6 +3,7 @@ import { prisma } from "../../utils/prisma";
 import { requireTenant } from "../../middlewares/requireTenant";
 import { requirePermission } from "../../middlewares/requirePermission";
 import { PERMISSIONS } from "../../config/permissions";
+import { requireActiveSubscription } from "../../middlewares/requireActiveSubscription";
 
 export const auditRoutes = async (app: FastifyInstance) => {
   app.get(
@@ -10,6 +11,7 @@ export const auditRoutes = async (app: FastifyInstance) => {
     {
       preHandler: [
         ...requireTenant,
+        requireActiveSubscription,
         requirePermission(PERMISSIONS.AUDIT_READ),
       ],
     },

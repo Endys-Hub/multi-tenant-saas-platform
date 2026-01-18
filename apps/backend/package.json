@@ -5,7 +5,8 @@
     "dev": "npm run prisma:generate && ts-node-dev src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "worker:email": "ts-node src/workers/email.worker.ts"
+    "worker:email": "ts-node src/workers/email.worker.ts",
+    "worker:billing": "ts-node src/workers/billing.worker.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -16,6 +17,7 @@
     "bullmq": "^5.66.5",
     "fastify": "4.29.1",
     "ioredis": "^5.9.2",
+    "stripe": "^20.2.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ import { requireTenant } from "../../middlewares/requireTenant";
 import { requirePermission } from "../../middlewares/requirePermission";
 import { PERMISSIONS } from "../../config/permissions";
 import { prisma } from "../../utils/prisma";
+import { emailQueue } from "../../queues/email.queue";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -49,7 +50,14 @@ export const inviteRoutes = async (app: FastifyInstance) => {
       });
 
       // Email sending comes next (stub for now)
-      console.log("Invite link:", `https://yourapp.com/accept-invite?token=${token}`);
+      // console.log("Invite link:", `https://yourapp.com/accept-invite?token=${token}`);
+
+      await emailQueue.add("sendInvite", {
+        email: body.email,
+        token,
+        organizationId: request.auth.organizationId,
+      });
+
 
       return { success: true };
     }

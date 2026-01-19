@@ -5,7 +5,11 @@ import rateLimit from "@fastify/rate-limit";
 import { tenantRateLimitKey } from "./plugins/rateLimit";
 
 export const buildApp = () => {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: {
+      level: process.env.NODE_ENV === "production" ? "info" : "debug",
+    },
+  });
 
   // Fastify typing boundary — coerced ONCE
   app.register(jwtPlugin as any);
@@ -21,7 +25,7 @@ export const buildApp = () => {
 
   app.register(registerRoutes);
 
-  app.get("/health", async () => ({ status: "ok" }));
+//  app.get("/health", async () => ({ status: "ok" }));
 
   app.ready(() => {
   console.log(app.printRoutes());

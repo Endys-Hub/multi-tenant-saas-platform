@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import jwtPlugin from "./plugins/jwt";
 import { registerRoutes } from "./routes";
 import rateLimit from "@fastify/rate-limit";
@@ -10,6 +11,13 @@ export const buildApp = () => {
       level: process.env.NODE_ENV === "production" ? "info" : "debug",
     },
   });
+
+   app.register(cors as any, {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Authorization", "Content-Type", "X-Organization-Id"],
+  });
+
 
   // Fastify typing boundary — coerced ONCE
   app.register(jwtPlugin as any);

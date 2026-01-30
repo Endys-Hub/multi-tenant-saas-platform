@@ -1,4 +1,3 @@
-import { logAudit } from "../../utils/audit";
 import { Prisma } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { prisma } from "../../utils/prisma";
@@ -30,46 +29,64 @@ export const acceptInviteRoutes = async (app: FastifyInstance) => {
     }
 
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Find or create user
       const existingUser = await tx.user.findUnique({
         where: { email: invite.email },
       });
 
+      let userId: string;
+
       if (existingUser) {
-        throw new Error("User already exists");
+        userId = existingUser.id;
+      } else {
+        const hashed = await hashPassword(password);
+
+        const user = await tx.user.create({
+          data: {
+            email: invite.email,
+            password: hashed,
+          },
+        });
+
+        userId = user.id;
       }
 
-      const hashed = await hashPassword(password);
-
-      const user = await tx.user.create({
-        data: {
-          email: invite.email,
-          password: hashed,
+      // Ensure membership exists
+      await tx.membership.upsert({
+        where: {
+          userId_organizationId: {
+            userId,
+            organizationId: invite.organizationId,
+          },
         },
-      });
-
-      await tx.membership.create({
-        data: {
-          userId: user.id,
+        update: {},
+        create: {
+          userId,
           organizationId: invite.organizationId,
           role: invite.role,
         },
       });
 
+      // Mark invite as accepted
       await tx.invitation.update({
         where: { id: invite.id },
         data: { acceptedAt: new Date() },
       });
 
-      // AUDIT LOG — AFTER SUCCESSFUL ACCEPTANCE
-      await logAudit({
-        organizationId: invite.organizationId,
-        userId: user.id,
-        action: "INVITE_ACCEPTED",
-        entity: "Invitation",
-        entityId: invite.id,
+      // AUDIT LOG — same transaction
+      await tx.auditLog.create({
+        data: {
+          organizationId: invite.organizationId,
+          userId,
+          action: "INVITE_ACCEPTED",
+          entity: "Invitation",
+          entityId: invite.id,
+        },
       });
 
       return { success: true };
     });
   });
 };
+
+

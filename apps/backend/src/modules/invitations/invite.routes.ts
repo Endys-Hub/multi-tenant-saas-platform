@@ -49,9 +49,6 @@ export const inviteRoutes = async (app: FastifyInstance) => {
         },
       });
 
-      // Email sending comes next (stub for now)
-      // console.log("Invite link:", `https://yourapp.com/accept-invite?token=${token}`);
-
       await emailQueue.add("sendInvite", {
         email: body.email,
         token,

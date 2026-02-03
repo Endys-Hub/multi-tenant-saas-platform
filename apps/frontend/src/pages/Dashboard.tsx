@@ -10,9 +10,17 @@ export default function Dashboard() {
       <p className="mb-4">Role: {auth.role}</p>
 
       {auth.role === "ORG_ADMIN" && (
-        <section className="border p-4 rounded bg-gray-50">
+        <section className="border p-4 rounded bg-gray-50 space-y-3">
           <h2 className="text-lg font-semibold">Admin Panel</h2>
           <p>You can manage users, billing, and settings.</p>
+
+          {/*Members management link*/}
+          <a
+            href="/members"
+            className="inline-block text-blue-600 underline font-medium"
+          >
+            Manage Members
+          </a>
         </section>
       )}
 
@@ -24,4 +32,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

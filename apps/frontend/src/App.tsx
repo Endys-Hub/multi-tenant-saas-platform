@@ -1,13 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import { Members } from "./pages/Members";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
-import InviteUser from "./pages/InviteUser";
 import { RequireRole } from "./components/RequireRole";
-import AcceptInvite from "./pages/AcceptInvite";
-
-function Dashboard() {
-  return <h1>Dashboard</h1>;
-}
 
 export default function App() {
   return (
@@ -15,7 +11,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
 
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
@@ -24,16 +20,19 @@ export default function App() {
       />
 
       <Route
-        path="/invite"
+        path="/members"
         element={
-          <RequireRole role="ORG_ADMIN">
-            <InviteUser />
-          </RequireRole>
+          <ProtectedRoute>
+            <RequireRole role="ORG_ADMIN">
+              <Members />
+            </RequireRole>
+          </ProtectedRoute>
         }
       />
 
-      <Route path="/accept-invite" element={<AcceptInvite />} />
-
+      {/* Redirect root → dashboard */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
+

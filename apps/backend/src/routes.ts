@@ -6,6 +6,7 @@ import { acceptInviteRoutes } from "./modules/invitations/accept.routes";
 import { auditRoutes } from "./modules/audit/audit.routes";
 import { webhookRoutes } from "./modules/billing/webhook.routes";
 import { healthRoutes } from "./modules/health/health.routes";
+import { membersRoutes } from "./modules/members/members.routes";
 
 
 export const registerRoutes = async (app: FastifyInstance) => {
@@ -15,5 +16,6 @@ export const registerRoutes = async (app: FastifyInstance) => {
   app.register(acceptInviteRoutes, { prefix: "/invitations" });
   app.register(auditRoutes, { prefix: "/audit" });
   app.register(webhookRoutes, { prefix: "/billing" });
+  app.register(membersRoutes, { prefix: "/members" });
   app.register(healthRoutes);
 };

@@ -1,35 +1,32 @@
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 
 export default function AcceptInvite() {
-  const [params] = useSearchParams();
-  const token = params.get("token");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const token = searchParams.get("token");
 
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
+  if (!token) {
+    return <p className="p-6">Invalid or missing invite token.</p>;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    if (!token) {
-      setError("Invalid invite link");
-      setLoading(false);
-      return;
-    }
-
     try {
       await api.post("/invitations/accept", {
         token,
-        password,
+        password, // true value
       });
 
-      // After success → login
       navigate("/login");
     } catch {
       setError("Invite is invalid or expired");
@@ -44,14 +41,14 @@ export default function AcceptInvite() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow w-80 space-y-4"
       >
-        <h2 className="text-xl font-semibold">Accept Invitation</h2>
+        <h2 className="text-xl font-semibold">Join Organization</h2>
 
         <input
           type="password"
           className="border p-2 w-full rounded"
-          placeholder="Set password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Set your password"
+          value={password}  // controlled
+          onChange={(e) => setPassword(e.target.value)} // bound
           required
         />
 
@@ -63,8 +60,9 @@ export default function AcceptInvite() {
           {loading ? "Joining..." : "Join Organization"}
         </button>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-600">{error}</p>}
       </form>
     </div>
   );
 }
+

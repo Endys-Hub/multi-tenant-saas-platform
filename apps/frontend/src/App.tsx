@@ -2,37 +2,47 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { Members } from "./pages/Members";
+import AcceptInvite from "./pages/AcceptInvite";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { RequireRole } from "./components/RequireRole";
+import { DashboardLayout } from "./layouts/DashboardLayout";
 
 export default function App() {
   return (
     <Routes>
+      {/* Public */}
       <Route path="/login" element={<Login />} />
 
+      <Route path="/accept-invite" element={<AcceptInvite />} />
+
+      {/* Protected app */}
       <Route
-        path="/dashboard"
+        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        {/* Default dashboard */}
+        <Route index element={<Navigate to="dashboard" replace />} />
 
-      <Route
-        path="/members"
-        element={
-          <ProtectedRoute>
+        <Route path="dashboard" element={<Dashboard />} />
+
+        <Route
+          path="members"
+          element={
             <RequireRole role="ORG_ADMIN">
               <Members />
             </RequireRole>
-          </ProtectedRoute>
-        }
-      />
+          }
+        />
+      </Route>
 
-      {/* Redirect root → dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
+
 

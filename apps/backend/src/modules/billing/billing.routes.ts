@@ -4,9 +4,9 @@ import { prisma } from "../../utils/prisma";
 import { requireTenant } from "../../middlewares/requireTenant";
 
 export const billingRoutes = async (app: FastifyInstance) => {
-  /**
-   * 🔹 Upgrade / Start paid plan
-   */
+  
+   // Start paid plan
+
   app.post(
     "/checkout",
     { preHandler: [...requireTenant] },
@@ -21,14 +21,11 @@ export const billingRoutes = async (app: FastifyInstance) => {
         throw new Error("Subscription not found");
       }
 
-      // 1️⃣ Create Stripe customer if missing
       let stripeCustomerId = subscription.stripeCustomerId;
 
       if (!stripeCustomerId) {
         const customer = await stripe.customers.create({
-          metadata: {
-            organizationId: orgId,
-          },
+          metadata: { organizationId: orgId },
         });
 
         stripeCustomerId = customer.id;
@@ -39,13 +36,12 @@ export const billingRoutes = async (app: FastifyInstance) => {
         });
       }
 
-      // 2️⃣ Create Checkout session
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         customer: stripeCustomerId,
         line_items: [
           {
-            price: process.env.STRIPE_PRO_PRICE_ID!, // 🔑
+            price: process.env.STRIPE_PRO_PRICE_ID!,
             quantity: 1,
           },
         ],
@@ -57,9 +53,6 @@ export const billingRoutes = async (app: FastifyInstance) => {
     }
   );
 
-  /**
-   * 🔹 Customer portal (now SAFE)
-   */
   app.post(
     "/portal",
     { preHandler: [...requireTenant] },
@@ -80,6 +73,31 @@ export const billingRoutes = async (app: FastifyInstance) => {
       });
 
       return { url: session.url };
+    }
+  );
+
+  app.get(
+    "/current",
+    { preHandler: [...requireTenant] },
+    async (request) => {
+      const orgId = request.auth.organizationId;
+
+      const subscription = await prisma.subscription.findUnique({
+        where: { organizationId: orgId },
+        select: {
+          plan: true,
+          status: true,
+          trialEndsAt: true,
+          startedAt: true,
+          canceledAt: true,
+        },
+      });
+
+      if (!subscription) {
+        throw new Error("Subscription not found");
+      }
+
+      return subscription;
     }
   );
 };

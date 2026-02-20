@@ -28,6 +28,12 @@ export const DashboardLayout = () => {
               Members
             </NavLink>
           </RequireRole>
+
+          <RequireRole role="ORG_ADMIN">
+            <NavLink to="/billing" className={navClass}>
+              Billing
+            </NavLink>
+          </RequireRole>
         </nav>
       </aside>
 

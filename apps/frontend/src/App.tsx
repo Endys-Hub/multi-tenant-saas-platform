@@ -6,6 +6,7 @@ import AcceptInvite from "./pages/AcceptInvite";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { RequireRole } from "./components/RequireRole";
 import { DashboardLayout } from "./layouts/DashboardLayout";
+import Billing from "./pages/Billing";
 
 export default function App() {
   return (
@@ -38,6 +39,17 @@ export default function App() {
           }
         />
       </Route>
+
+      <Route
+        path="/billing"
+        element={
+          <ProtectedRoute>
+            <RequireRole role="ORG_ADMIN">
+              <Billing />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -11,3 +11,20 @@ export const inviteUser = async (
 
   return res.data;
 };
+
+export const getPendingInvitations = async () => {
+  const res = await api.get("/invitations");
+  return res.data;
+};
+
+export const acceptInvitation = async (
+  token: string,
+  password: string
+) => {
+  const res = await api.post("/invitations/accept", {
+    token,
+    password,
+  });
+
+  return res.data;
+};

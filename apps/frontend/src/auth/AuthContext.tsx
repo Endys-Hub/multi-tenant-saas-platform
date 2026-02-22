@@ -4,11 +4,16 @@ export interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
   role: "ORG_ADMIN" | "MEMBER" | null;
+  organizationId: string | null;
 }
 
 export interface AuthContextValue {
   auth: AuthState;
-  login: (token: string, role: AuthState["role"]) => void;
+  login: (
+    token: string,
+    role: AuthState["role"],
+    organizationId: string
+  ) => void;
   logout: () => void;
 }
 

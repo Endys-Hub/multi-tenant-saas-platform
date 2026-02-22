@@ -14,7 +14,7 @@ export default function App() {
       {/* Public */}
       <Route path="/login" element={<Login />} />
 
-      <Route path="/accept-invite" element={<AcceptInvite />} />
+      <Route path="/accept-invitation" element={<AcceptInvite />} />
 
       {/* Protected app */}
       <Route

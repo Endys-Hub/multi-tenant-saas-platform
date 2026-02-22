@@ -30,10 +30,10 @@ export default function Login() {
       const { organizationId, role } = orgRes.data;
 
       // Store org context
-      localStorage.setItem("orgId", organizationId);
+      localStorage.setItem("orgId", organizationId);  // organizationId ("orgId")
 
       // Finalize auth
-      login(token, role);
+      login(token, role, organizationId);
 
       // Redirect
       navigate("/dashboard", { replace: true });

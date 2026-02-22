@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { api } from "../api/client";
+import { acceptInvitation } from "../api/invitations";
 
 export default function AcceptInvite() {
   const [searchParams] = useSearchParams();
@@ -13,23 +13,35 @@ export default function AcceptInvite() {
   const [error, setError] = useState<string | null>(null);
 
   if (!token) {
-    return <p className="p-6">Invalid or missing invite token.</p>;
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-600">
+          Invalid or missing invitation token.
+        </p>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await api.post("/invitations/accept", {
-        token,
-        password, // true value
-      });
+      await acceptInvitation(token, password);
 
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+        state: { message: "Invitation accepted. Please login." },
+      });
     } catch {
-      setError("Invite is invalid or expired");
+      setError("Invitation is invalid, expired, or already used.");
     } finally {
       setLoading(false);
     }
@@ -41,26 +53,32 @@ export default function AcceptInvite() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow w-80 space-y-4"
       >
-        <h2 className="text-xl font-semibold">Join Organization</h2>
+        <h2 className="text-xl font-semibold">
+          Join Organization
+        </h2>
 
         <input
           type="password"
           className="border p-2 w-full rounded"
           placeholder="Set your password"
-          value={password}  // controlled
-          onChange={(e) => setPassword(e.target.value)} // bound
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white py-2 rounded w-full"
+          className="bg-black text-white py-2 rounded w-full hover:bg-gray-800"
         >
           {loading ? "Joining..." : "Join Organization"}
         </button>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && (
+          <p className="text-red-600 text-sm">
+            {error}
+          </p>
+        )}
       </form>
     </div>
   );

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { fetchMembers, type Member } from "../api/members";
+import {
+  inviteUser,
+  getPendingInvitations,
+} from "../api/invitations";
 import { RequireRole } from "../components/RequireRole";
 
 const formatDate = (date: string | null | undefined) => {
@@ -9,43 +13,151 @@ const formatDate = (date: string | null | undefined) => {
 
 export const Members = () => {
   const [members, setMembers] = useState<Member[]>([]);
+  const [pending, setPending] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"MEMBER" | "ORG_ADMIN">("MEMBER");
+  const [inviting, setInviting] = useState(false);
+
+  const loadData = async () => {
+    const [memberData, pendingData] = await Promise.all([
+      fetchMembers(),
+      getPendingInvitations(),
+    ]);
+
+    setMembers(memberData);
+    setPending(pendingData);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    fetchMembers()
-      .then(setMembers)
-      .finally(() => setLoading(false));
+    loadData();
   }, []);
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviting(true);
+
+    await inviteUser(email, role);
+
+    setEmail("");
+    await loadData();
+
+    setInviting(false);
+  };
 
   if (loading) return <p>Loading members…</p>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold mb-4">Organization Members</h1>
+    <div className="p-6 space-y-8">
+      <h1 className="text-xl font-semibold">
+        Organization Members
+      </h1>
 
-      <table className="w-full border">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-2">Email</th>
-            <th className="p-2">Role</th>
-            <th className="p-2">Joined</th>
-            <RequireRole role="ORG_ADMIN">
-              <th className="p-2">Actions</th>
-            </RequireRole>
-          </tr>
-        </thead>
+      {/* Invite Section (ORG_ADMIN only) */}
+      <RequireRole role="ORG_ADMIN">
+        <div className="bg-white p-6 rounded shadow space-y-4 max-w-lg">
+          <h2 className="font-medium">Invite Member</h2>
 
-        <tbody>
-          {members.map((member) => (
-            <tr key={`${member.email}-${member.joinedAt}`}>
-              <td>{member.email}</td>
-              <td>{member.role}</td>
-              <td>{formatDate(member.joinedAt)}</td>
+          <form
+            onSubmit={handleInvite}
+            className="space-y-3"
+          >
+            <input
+              type="email"
+              placeholder="Email address"
+              className="border p-2 w-full rounded"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <select
+              className="border p-2 w-full rounded"
+              value={role}
+              onChange={(e) =>
+                setRole(e.target.value as "MEMBER" | "ORG_ADMIN")
+              }
+            >
+              <option value="MEMBER">Member</option>
+              <option value="ORG_ADMIN">Org Admin</option>
+            </select>
+
+            <button
+              disabled={inviting}
+              className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+            >
+              {inviting ? "Sending..." : "Send Invitation"}
+            </button>
+          </form>
+        </div>
+      </RequireRole>
+
+      {/* Members Table */}
+      <div>
+        <h2 className="font-medium mb-3">Active Members</h2>
+
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-100 text-left">
+              <th className="p-2">Email</th>
+              <th className="p-2">Role</th>
+              <th className="p-2">Joined</th>
             </tr>
-          ))}
-        </tbody>
+          </thead>
 
-      </table>
+          <tbody>
+            {members.map((member) => (
+              <tr key={`${member.email}-${member.joinedAt}`}>
+                <td className="p-2">{member.email}</td>
+                <td className="p-2">{member.role}</td>
+                <td className="p-2">
+                  {formatDate(member.joinedAt)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pending Invitations */}
+      <RequireRole role="ORG_ADMIN">
+        <div>
+          <h2 className="font-medium mb-3">
+            Pending Invitations
+          </h2>
+
+          {pending.length === 0 && (
+            <p className="text-sm text-gray-500">
+              No pending invitations.
+            </p>
+          )}
+
+          {pending.length > 0 && (
+            <table className="w-full border">
+              <thead>
+                <tr className="bg-gray-100 text-left">
+                  <th className="p-2">Email</th>
+                  <th className="p-2">Role</th>
+                  <th className="p-2">Expires</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pending.map((invite) => (
+                  <tr key={invite.id}>
+                    <td className="p-2">{invite.email}</td>
+                    <td className="p-2">{invite.role}</td>
+                    <td className="p-2">
+                      {formatDate(invite.expiresAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </RequireRole>
     </div>
   );
 };

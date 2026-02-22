@@ -14,6 +14,39 @@ const inviteSchema = z.object({
 });
 
 export const inviteRoutes = async (app: FastifyInstance) => {
+  app.get(
+    "/",
+    {
+      preHandler: [
+        ...requireTenant,
+        requirePermission(PERMISSIONS.USER_INVITE),
+      ],
+    },
+    async (request) => {
+      const invitations = await prisma.invitation.findMany({
+        where: {
+          organizationId: request.auth.organizationId,
+          acceptedAt: null,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          expiresAt: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return invitations;
+    }
+  );
+
   app.post(
     "/invite",
     {

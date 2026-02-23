@@ -6,14 +6,14 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  const orgId = localStorage.getItem("orgId");
+  const organizationId = localStorage.getItem("organizationId");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  if (orgId) {
-    config.headers["X-Organization-Id"] = orgId;
+  if (organizationId) {
+    config.headers["X-Organization-Id"] = organizationId;
   }
 
   return config;

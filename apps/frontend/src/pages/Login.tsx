@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginRequest } from "../api/auth";
 import { useAuth } from "../auth/useAuth";
-import { api } from "../api/client";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -17,25 +16,16 @@ export default function Login() {
     setError(null);
 
     try {
-      // Authenticate
-      const { token } = await loginRequest(email, password);
+      const {
+        token,
+        organizationId,
+        role,
+        userId,
+      } = await loginRequest(email, password);
 
-      // Bootstrap org context
-      const orgRes = await api.get("/org/bootstrap", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Finalize auth (AuthProvider stores everything)
+      login(token, role, organizationId, userId);
 
-      const { organizationId, role } = orgRes.data;
-
-      // Store org context
-      localStorage.setItem("orgId", organizationId);  // organizationId ("orgId")
-
-      // Finalize auth
-      login(token, role, organizationId);
-
-      // Redirect
       navigate("/dashboard", { replace: true });
     } catch {
       setError("Invalid credentials");

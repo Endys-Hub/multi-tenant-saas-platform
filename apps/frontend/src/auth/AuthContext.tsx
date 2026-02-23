@@ -5,6 +5,7 @@ export interface AuthState {
   token: string | null;
   role: "ORG_ADMIN" | "MEMBER" | null;
   organizationId: string | null;
+  userId: string | null; // 👈 ADD THIS
 }
 
 export interface AuthContextValue {
@@ -12,12 +13,14 @@ export interface AuthContextValue {
   login: (
     token: string,
     role: AuthState["role"],
-    organizationId: string
+    organizationId: string,
+    userId: string // 👈 ADD THIS
   ) => void;
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextValue | null>(null);
+export const AuthContext =
+  createContext<AuthContextValue | null>(null);
 
 
 

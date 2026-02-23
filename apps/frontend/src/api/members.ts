@@ -1,7 +1,7 @@
 import { api } from "./client";
 
 export interface Member {
-  id: string;
+  userId: string; // match backend
   email: string;
   role: "ORG_ADMIN" | "MEMBER";
   joinedAt: string;
@@ -10,5 +10,9 @@ export interface Member {
 export const fetchMembers = async (): Promise<Member[]> => {
   const res = await api.get("/members");
   return res.data;
+};
+
+export const removeMember = async (userId: string) => {
+  await api.delete(`/members/${userId}`);
 };
 

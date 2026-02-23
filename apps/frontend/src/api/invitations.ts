@@ -28,3 +28,8 @@ export const acceptInvitation = async (
 
   return res.data;
 };
+
+export const revokeInvitation = async (id: string) => {
+  const res = await api.delete(`/invitations/${id}`);
+  return res.data;
+};

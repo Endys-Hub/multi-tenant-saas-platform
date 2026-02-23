@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { fetchMembers, type Member } from "../api/members";
+import {
+  fetchMembers,
+  removeMember,
+  type Member,
+} from "../api/members";
 import {
   inviteUser,
   getPendingInvitations,
+  revokeInvitation,
 } from "../api/invitations";
 import { RequireRole } from "../components/RequireRole";
+import { useAuth } from "../auth/useAuth";
 
 const formatDate = (date: string | null | undefined) => {
   if (!date) return "—";
@@ -12,6 +18,8 @@ const formatDate = (date: string | null | undefined) => {
 };
 
 export const Members = () => {
+  const { auth } = useAuth();
+
   const [members, setMembers] = useState<Member[]>([]);
   const [pending, setPending] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +55,21 @@ export const Members = () => {
     setInviting(false);
   };
 
+  const handleRevoke = async (id: string) => {
+    if (!window.confirm("Revoke this invitation?")) return;
+
+    await revokeInvitation(id);
+    await loadData();
+  };
+
+  const handleRemoveMember = async (userId: string) => {
+    if (!window.confirm("Remove this member from the organization?"))
+      return;
+
+    await removeMember(userId);
+    await loadData();
+  };
+
   if (loading) return <p>Loading members…</p>;
 
   return (
@@ -55,15 +78,12 @@ export const Members = () => {
         Organization Members
       </h1>
 
-      {/* Invite Section (ORG_ADMIN only) */}
+      {/* Invite Section */}
       <RequireRole role="ORG_ADMIN">
         <div className="bg-white p-6 rounded shadow space-y-4 max-w-lg">
           <h2 className="font-medium">Invite Member</h2>
 
-          <form
-            onSubmit={handleInvite}
-            className="space-y-3"
-          >
+          <form onSubmit={handleInvite} className="space-y-3">
             <input
               type="email"
               placeholder="Email address"
@@ -94,7 +114,7 @@ export const Members = () => {
         </div>
       </RequireRole>
 
-      {/* Members Table */}
+      {/* Active Members */}
       <div>
         <h2 className="font-medium mb-3">Active Members</h2>
 
@@ -104,17 +124,35 @@ export const Members = () => {
               <th className="p-2">Email</th>
               <th className="p-2">Role</th>
               <th className="p-2">Joined</th>
+              <RequireRole role="ORG_ADMIN">
+                <th className="p-2">Actions</th>
+              </RequireRole>
             </tr>
           </thead>
 
           <tbody>
             {members.map((member) => (
-              <tr key={`${member.email}-${member.joinedAt}`}>
+              <tr key={member.userId}>
                 <td className="p-2">{member.email}</td>
                 <td className="p-2">{member.role}</td>
                 <td className="p-2">
                   {formatDate(member.joinedAt)}
                 </td>
+
+                <RequireRole role="ORG_ADMIN">
+                  <td className="p-2">
+                    {member.userId !== auth?.userId && (
+                      <button
+                        onClick={() =>
+                          handleRemoveMember(member.userId)
+                        }
+                        className="text-red-600 text-sm hover:underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </td>
+                </RequireRole>
               </tr>
             ))}
           </tbody>
@@ -141,6 +179,7 @@ export const Members = () => {
                   <th className="p-2">Email</th>
                   <th className="p-2">Role</th>
                   <th className="p-2">Expires</th>
+                  <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,6 +189,14 @@ export const Members = () => {
                     <td className="p-2">{invite.role}</td>
                     <td className="p-2">
                       {formatDate(invite.expiresAt)}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleRevoke(invite.id)}
+                        className="text-red-600 text-sm hover:underline"
+                      >
+                        Revoke
+                      </button>
                     </td>
                   </tr>
                 ))}

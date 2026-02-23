@@ -12,6 +12,7 @@ process.on("uncaughtException", (err) => {
 
 // App bootstrap
 import "./config/env";
+import "./queues/email.queue";
 import { buildApp } from "./app";
 
 const start = async () => {

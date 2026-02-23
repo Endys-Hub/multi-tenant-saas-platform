@@ -14,6 +14,9 @@ const inviteSchema = z.object({
 });
 
 export const inviteRoutes = async (app: FastifyInstance) => {
+  
+  // Pending Invitations
+  
   app.get(
     "/",
     {
@@ -46,6 +49,8 @@ export const inviteRoutes = async (app: FastifyInstance) => {
       return invitations;
     }
   );
+
+  // Invitation
 
   app.post(
     "/invite",
@@ -82,12 +87,65 @@ export const inviteRoutes = async (app: FastifyInstance) => {
         },
       });
 
+      const organization = await prisma.organization.findUnique({
+        where: { id: request.auth.organizationId },
+        select: { name: true },
+      });
+
       await emailQueue.add("sendInvite", {
         email: body.email,
         token,
-        organizationId: request.auth.organizationId,
+        organizationName:
+          organization?.name ?? "Your Organization",
       });
 
+      return { success: true };
+    }
+  );
+
+  // Revoke
+
+  app.delete(
+    "/:id",
+    {
+      preHandler: [
+        ...requireTenant,
+        requirePermission(PERMISSIONS.USER_INVITE),
+      ],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+
+      const invite = await prisma.invitation.findFirst({
+        where: {
+          id,
+          organizationId: request.auth.organizationId,
+        },
+      });
+
+      if (!invite) {
+        return reply
+          .status(404)
+          .send({ message: "Invitation not found" });
+      }
+
+      if (invite.acceptedAt) {
+        return reply
+          .status(400)
+          .send({ message: "Invitation already accepted" });
+      }
+
+      await prisma.invitation.delete({
+        where: { id },
+      });
+
+      await logAudit({
+        organizationId: request.auth.organizationId,
+        userId: request.auth.userId,
+        action: "INVITE_REVOKED",
+        entity: "Invitation",
+        entityId: id,
+      });
 
       return { success: true };
     }

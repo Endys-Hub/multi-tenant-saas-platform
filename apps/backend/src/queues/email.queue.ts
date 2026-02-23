@@ -11,9 +11,9 @@ new Worker(
   "email",
   async (job) => {
     if (job.name === "sendInvite") {
-      const { email, token, organizationId } = job.data;
+      const { email, token, organizationName } = job.data;
 
-      await sendInviteEmail(email, token, organizationId);
+      await sendInviteEmail(email, token, organizationName);
     }
   },
   {

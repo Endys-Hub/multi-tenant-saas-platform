@@ -4,6 +4,7 @@ export const PERMISSIONS = {
 
   USER_READ: "user:read",
   USER_INVITE: "user:invite",
+  USER_REMOVE: "user:remove", // Added
 
   AUDIT_READ: "audit:read",
 

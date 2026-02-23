@@ -94,6 +94,7 @@ export const authRoutes = async (app: FastifyInstance) => {
         token,
         organizationId: membership.organizationId,
         role: membership.role,
+        userId: user.id,
       });
     }
   );

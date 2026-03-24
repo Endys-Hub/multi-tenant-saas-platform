@@ -12,6 +12,14 @@ export const buildApp = () => {
     },
   });
 
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "buffer" },
+    (req, body, done) => {
+      done(null, body);
+    }
+  );
+
    app.register(cors as any, {
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

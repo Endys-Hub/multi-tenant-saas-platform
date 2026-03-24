@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import { Members } from "./pages/Members";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -13,7 +14,7 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
-
+      <Route path="/signup" element={<Signup />} />
       <Route path="/accept-invitation" element={<AcceptInvite />} />
 
       {/* Protected app */}

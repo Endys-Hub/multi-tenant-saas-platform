@@ -1,174 +1,240 @@
 # Multi-Tenant SaaS Platform
 
-A production-focused, multi-tenant SaaS platform built with **TypeScript, React, Node.js, PostgreSQL, Docker, and AWS**.
+## Overview
 
-This repository contains a real SaaS foundation designed to support multiple organizations in a single system, with proper tenant isolation, authentication, authorization, and deployment considerations.
-
-It is not a demo app or a tutorial walkthrough. It is a practical implementation of patterns used in modern B2B SaaS products.
-
----
+This project is a production-grade, multi-tenant SaaS platform built with **TypeScript, React, Node.js, PostgreSQL, and Docker.** The project represents a real-world SaaS architecture implementing the core systems required to build scalable B2B software. It includes **Tenant Isolation, Authentication, Role-Based Access Control (RBAC), Invitations, Billing (Stripe), Async jobs, and Email delivery**, structured in a way that mirrors production systems.
 
 ## Why This Project
 
-Many portfolios focus on features in isolation.  
-This project focuses on **system design and engineering trade-offs**.
+Most portfolios showcase isolated features. This project demonstrates how real SaaS systems are engineered end-to-end, focusing on:
 
-The goal is to demonstrate how a real SaaS platform is structured end to end:
+- System design over surface-level features  
+- Correctness and safety over shortcuts  
+- Real-world trade-offs in multi-tenant environments  
 
-- how tenants are modeled  
-- how access is controlled  
-- how data isolation is enforced  
-- how the system is deployed and operated  
+It answers:
 
----
+- How do you safely support multiple organizations in one system?
+- How do you enforce access boundaries?
+- How do you handle billing without touching card data?
+- How do you design for growth from day one?
 
 ## What the Platform Does
 
 The system allows:
 
-- Multiple organizations (tenants) to sign up and use the same application  
-- Each organization to manage its own users and roles  
-- Access to be controlled via role-based permissions  
-- All tenant data to live in a shared database without cross-tenant access  
-
-This architecture is representative of internal tools, CRMs, admin dashboards, and other B2B SaaS products.
-
----
+- Organizations to sign up and operate in isolated environments  
+- Users to belong to organizations with roles (ORG_ADMIN, MEMBER)  
+- Admins to invite users via secure, token-based email flows  
+- Users to accept invitations and join organizations  
+- Admins to manage members (invite, revoke, remove)  
+- Organizations to upgrade and manage billing via Stripe  
+- Subscription-aware UI and backend enforcement  
 
 ## High-Level Architecture
 
-- **Frontend**: React + TypeScript, served via S3 and CloudFront  
-- **Backend**: Node.js + TypeScript (Fastify), REST API with JWT authentication  
-- **Database**: PostgreSQL (RDS)  
-- **Infrastructure**: Docker for local development, AWS for production  
+### Mono-repo
 
-The system runs as a single backend application with strict tenant scoping enforced at the API and data layers.
+- **Frontend**: React + TypeScript (Vite)
+- **Backend**: Node.js + TypeScript (Fastify)
+- **Database**: PostgreSQL (via Prisma ORM)
+- **Async Jobs**: BullMQ + Redis
+- **Email Delivery**: Resend
+- **Billing**: Stripe (Checkout + Customer Portal)
+- **Infrastructure**: Docker (local), AWS (production-ready)
 
----
+The system runs as a **single backend service** with strict tenant scoping enforced at:
 
-## Core Concepts Demonstrated
+- Request layer (middleware)
+- Business logic
+- Database queries
+
+## Core Features Implemented
 
 ### Multi-Tenancy
-- Single backend and database  
-- Every request is scoped to an organization  
-- Tenant isolation enforced server-side  
+- Single database, multi-tenant architecture  
+- Tenant context enforced via middleware  
+- No cross-organization data leakage  
+- Organization-scoped queries everywhere 
+- Rate limiting 
 
-### Authentication & Authorization
+### Authentication & Identity
 - JWT-based authentication  
 - Secure password hashing  
-- Role-Based Access Control (RBAC)  
-- Permission checks at API boundaries  
+- Identity includes:
+  - `userId`
+  - `organizationId`
+  - `role`
+- Persistent auth state (frontend + backend aligned)
 
-### Data Modeling
-- Users  
-- Organizations  
-- Memberships  
-- Roles and permissions  
-- Audit logs  
-- Subscriptions and billing logic  
+### Role-Based Access Control (RBAC)
+- Permission-based system (not hardcoded roles)
+- Examples:
+  - `user:invite`
+  - `user:remove`
+  - `billing:update`
+- Middleware-level enforcement
+- Role → Permission mapping
+
+### Invitations System (Production-Grade)
+- Token-based invitation flow  
+- Expiring invite links (24h)  
+- Email delivery via Resend  
+- Accept flow with:
+  - User creation (if new)
+  - Membership creation
+  - Audit logging  
+
+### Organization Management
+- Invite members  
+- View active members  
+- Revoke pending invitations  
+- Remove members  
+- Prevent self-removal (UI + backend enforced)  
+
+### Billing & Subscriptions (Stripe)
+- Stripe Checkout integration  
+- Stripe Customer Portal integration  
+- No card data handled by frontend/backend  
+- Secure session-based billing  
+
+Endpoints:
+- `/billing/checkout`
+- `/billing/portal`
+- `/billing/current`
+
+Frontend:
+- Dynamic billing UI (Upgrade / Manage)
+- Subscription-aware UX
+
+### Subscription Awareness
+- Plan: FREE / PRO  
+- Status: TRIALING / ACTIVE / CANCELED  
+- UI reflects subscription state  
+- Foundation for feature gating  
+
+### Async Processing (Queues)
+- BullMQ + Redis for background jobs  
+- Email sending offloaded from request cycle  
+- Worker-based architecture  
+
+Flow:
+
+`Invite → Queue Job → Worker → Resend Email`
+
+### Email System
+- Resend integration  
+- HTML email templates  
+- Organization-branded invites  
+- Tokenized acceptance links  
+
+### Audit Logging
+- All critical actions logged:
+  - Invite created
+  - Invite accepted
+  - Member removed  
+- Stored per organization  
+- Designed for compliance & traceability  
 
 ### API Design
-- Request validation with Zod  
+- Fastify for performance  
+- Zod for validation  
+- Typed request/response contracts  
 - Centralized error handling  
-- Typed request and response structures  
-- Predictable API behavior  
+- Clean, predictable REST structure  
 
-### Development & Deployment
-- Fully containerized local setup  
-- One-command startup with Docker Compose  
-- Production deployment using AWS ECS, RDS, and CloudFront  
-- CI/CD via GitHub Actions  
-
----
+### Frontend Architecture
+- React + TypeScript  
+- Auth context with persistent state  
+- Protected routes  
+- Role-based UI rendering  
+- API client with automatic:
+  - JWT injection  
+  - Tenant header injection  
 
 ## Tech Stack
 
 ### Frontend
-- React  
-- TypeScript  
-- Protected routes  
-- Role-based UI rendering  
+- React (Vite)
+- TypeScript
+- Axios
+- Tailwind CSS
 
 ### Backend
-- Node.js  
-- TypeScript  
-- Fastify  
-- Prisma ORM  
-- JWT authentication  
-- Zod validation  
+- Node.js
+- TypeScript
+- Fastify
+- Prisma ORM
+- Zod validation
 
 ### Database
-- PostgreSQL  
-- Transaction-safe queries  
-- Tenant-scoped access patterns  
+- PostgreSQL
+- Transaction-safe operations
+- Tenant-scoped queries
 
 ### Infrastructure
-- Docker & Docker Compose  
-- AWS (ECS, RDS, S3, CloudFront)  
-- GitHub Actions  
+- Docker & Docker Compose
+- Redis (for queues)
+- AWS (ECS, RDS, S3, CloudFront)
+- GitHub Actions (CI/CD ready)
 
----
-
-## Repository Structure
-```
-multi-tenant-saas-platform/
-├── apps/
-│ ├── frontend/ # React + TypeScript frontend
-│ └── backend/ # Node.js + TypeScript API
-│ ├── prisma/ # Prisma schema & migrations
-│ ├── src/ # Application source code
-│ ├── Dockerfile
-│ ├── package.json
-│ └── tsconfig.json
-├── infra/ # AWS & infrastructure configuration
-├── docker-compose.yml # One-command local setup
-└── README.md
-```
-
-The repository is structured as a monorepo to keep frontend, backend, and infrastructure concerns aligned.
+### Third-Party Services
+- Stripe (billing)
+- Resend (email delivery)
 
 ## Running Locally
 
-```docker compose up --build```
-This starts the frontend, backend API, and PostgreSQL database
+```
+docker compose up --build
 
-## Deployment
+npm run dev
+```
+This starts:
 
-The application is deployed using AWS:
+- Frontend (React)
+- Backend API
+- PostgreSQL
+- Redis (for queues)
 
-Backend runs on ECS (Fargate)
+## Sample Pictures
 
-Database runs on RDS (PostgreSQL)
+### Dashboard, Members, Billing:
 
-Frontend is hosted on S3 and served via CloudFront
+![dashboard](assets/saas-dashboard.png)
 
-Secrets are managed through AWS
+![members](assets/saas-members.png)
 
-CI/CD is handled via GitHub Actions
+![billing](assets/saas-billing.png)
 
-## Project Status
+### Local Environment:
 
-The platform is built incrementally, with development progress documented through:
+![dev-env](assets/saas-dev-env.png)
 
-GitHub commits and issues
+## Repository Structure
 
-Public posts outlining design decisions and lessons learned
-
-## About
-
-This project reflects how I approach building production systems:
-
-prioritizing correctness over shortcuts
-
-designing for scale from the start
-
-making trade-offs intentionally
-
-If you are reviewing this repository as part of a hiring process, it represents how I think about real-world software engineering problems, not just how I write code.
+```
+multi-tenant-saas-platform/
+├── .github/
+├── apps/
+│ ├── frontend/ # React + TypeScript frontend
+│ └── backend/ # Fastify API
+│ ├── prisma/ # Schema & migrations
+│ ├── src/
+│ │ ├── modules/ # Domain modules (auth, billing, etc.)
+│ │ ├── middlewares/
+│ │ ├── queues/
+│ │ ├── utils/
+│ │ └── config/
+│ ├── Dockerfile
+│ └── package.json
+├── infra/ # AWS
+├── docker-compose.yml
+├── .gitignore
+└── README.md
+```
 
 ## Contact
 
-GitHub: https://github.com/endys-hub
-
-LinkedIn: https://linkedin.com/ndudi-okehi-813137390
-
+- **Name:** Ndudi-Okehi Ndudi
+- **Email:** https://github.com/endys-hub
+- **LinkedIn:** https://linkedin.com/in/ndudi-okehi-813137390

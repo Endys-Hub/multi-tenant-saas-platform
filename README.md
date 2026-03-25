@@ -237,4 +237,4 @@ multi-tenant-saas-platform/
 
 - **Name:** Ndudi-Okehi Ndudi
 - **Email:** https://github.com/endys-hub
-- **LinkedIn:** https://linkedin.com/in/ndudi-okehi-813137390
+- **LinkedIn:** https://www.linkedin.com/in/ndudi-okehi-813139370

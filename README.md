@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a production-grade, multi-tenant SaaS platform built with **TypeScript, React, Node.js, PostgreSQL, and Docker.** The project represents a real-world SaaS architecture implementing the core systems required to build scalable B2B software. It includes **Tenant Isolation, Authentication, Role-Based Access Control (RBAC), Invitations, Billing (Stripe), Async jobs, and Email delivery**, structured in a way that mirrors production systems.
+This project is a production-grade, multi-tenant SaaS platform built with **TypeScript, React, Node.js (Fastify), PostgreSQL (Prisma ORM), Redis, and Docker.** The project represents a real-world SaaS architecture implementing the core systems required to build scalable B2B software. It includes **Tenant Isolation, Authentication, Role-Based Access Control (RBAC), Invitations, Billing (Stripe), Async jobs, and Email delivery**, structured in a way that mirrors production systems.
 
 ## Why This Project
 
@@ -96,7 +96,8 @@ The system runs as a **single backend service** with strict tenant scoping enfor
 - Stripe Checkout integration  
 - Stripe Customer Portal integration  
 - No card data handled by frontend/backend  
-- Secure session-based billing  
+- Secure session-based billing
+- Stripe Webhooks (subscription lifecycle automation)  
 
 Endpoints:
 - `/billing/checkout`
@@ -116,7 +117,8 @@ Frontend:
 ### Async Processing (Queues)
 - BullMQ + Redis for background jobs  
 - Email sending offloaded from request cycle  
-- Worker-based architecture  
+- Worker-based architecture 
+- Webhook-driven billing updates processed asynchronously 
 
 Flow:
 
@@ -169,13 +171,11 @@ Flow:
 
 ### Database
 - PostgreSQL
-- Transaction-safe operations
-- Tenant-scoped queries
+- Prisma ORM
 
 ### Infrastructure
 - Docker & Docker Compose
 - Redis (for queues)
-- AWS (ECS, RDS, S3, CloudFront)
 - GitHub Actions (CI/CD ready)
 
 ### Third-Party Services
@@ -236,5 +236,5 @@ multi-tenant-saas-platform/
 ## Contact
 
 - **Name:** Ndudi-Okehi Ndudi
-- **Email:** https://github.com/endys-hub
+- **Email:** ndudiokehi@gmail.com
 - **LinkedIn:** https://www.linkedin.com/in/ndudi-okehi-813139370

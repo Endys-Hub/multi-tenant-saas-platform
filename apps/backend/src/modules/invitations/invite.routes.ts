@@ -7,6 +7,7 @@ import { requirePermission } from "../../middlewares/requirePermission";
 import { PERMISSIONS } from "../../config/permissions";
 import { prisma } from "../../utils/prisma";
 import { emailQueue } from "../../queues/email.queue";
+import { requirePlan } from "../../middlewares/requirePlan";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -58,6 +59,7 @@ export const inviteRoutes = async (app: FastifyInstance) => {
       preHandler: [
         ...requireTenant,
         requirePermission(PERMISSIONS.USER_INVITE),
+        requirePlan("PRO"),
       ],
     },
     async (request) => {

@@ -4,11 +4,11 @@ import { requireTenant } from "../../middlewares/requireTenant";
 import { requirePermission } from "../../middlewares/requirePermission";
 import { PERMISSIONS } from "../../config/permissions";
 import { logAudit } from "../../utils/audit";
+import { requirePlan } from "../../middlewares/requirePlan";
 
 export const membersRoutes = async (app: FastifyInstance) => {
-  /**
-   * 🔹 Get Members
-   */
+
+   // Get Members
   app.get(
     "/",
     {
@@ -55,6 +55,7 @@ export const membersRoutes = async (app: FastifyInstance) => {
       preHandler: [
         ...requireTenant,
         requirePermission(PERMISSIONS.USER_REMOVE),
+        requirePlan("PRO"),
       ],
     },
     async (request, reply) => {

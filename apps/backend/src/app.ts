@@ -12,33 +12,29 @@ export const buildApp = () => {
     },
   });
 
-   app.register(cors as any, {
-    origin: "http://localhost:5173",
+  app.register(cors as any, {
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Authorization", "Content-Type", "X-Organization-Id"],
   });
-
 
   // Fastify typing boundary — coerced ONCE
   app.register(jwtPlugin as any);
 
   app.register(rateLimit as any, {
-  global: false, // controled per route
-});
+    global: false,
+  });
 
   app.register(rateLimit as any, {
-  global: false,
-  //keyGenerator: tenantRateLimitKey,
-});
+    global: false,
+    // keyGenerator: tenantRateLimitKey,
+  });
 
   app.register(registerRoutes);
 
-//  app.get("/health", async () => ({ status: "ok" }));
-
   app.ready(() => {
-  console.log(app.printRoutes());
-});
-
+    console.log(app.printRoutes());
+  });
 
   return app;
 };

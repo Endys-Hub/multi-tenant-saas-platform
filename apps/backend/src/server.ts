@@ -13,7 +13,7 @@ process.on("uncaughtException", (err) => {
 // App bootstrap
 import "./config/env";
 import "./queues/email.queue";
-import "./queues/billing.queue"; 
+import "./queues/billing.queue";
 
 import { buildApp } from "./app";
 
@@ -21,8 +21,10 @@ const start = async () => {
   const app = buildApp();
 
   try {
-    await app.listen({ port: 4000, host: "0.0.0.0" });
-    console.log("API running on http://localhost:4000");
+    const port = Number(process.env.PORT) || 4000;
+
+    await app.listen({ port, host: "0.0.0.0" });
+    console.log(`API running on http://localhost:${port}`);
   } catch (err) {
     console.error("Failed to start server", err);
     process.exit(1);

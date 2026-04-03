@@ -17,8 +17,8 @@ export const checkoutRoutes = async (app: FastifyInstance) => {
             quantity: 1,
           },
         ],
-        success_url: "https://yourapp.com/billing/success",
-        cancel_url: "https://yourapp.com/billing/cancel",
+        success_url: `${process.env.FRONTEND_URL}/billing/success`,
+        cancel_url: `${process.env.FRONTEND_URL}/billing/cancel`,
         metadata: {
           organizationId: request.auth.organizationId,
         },

@@ -3,7 +3,7 @@ import { redisConnection } from "./connection";
 import { sendInviteEmail } from "../utils/email";
 
 export const emailQueue = new Queue("email", {
-  connection: redisConnection,
+  connection: redisConnection.connection,
 });
 
 // Worker to process email jobs
@@ -17,6 +17,6 @@ new Worker(
     }
   },
   {
-    connection: redisConnection,
+  connection: redisConnection.connection,
   }
 );

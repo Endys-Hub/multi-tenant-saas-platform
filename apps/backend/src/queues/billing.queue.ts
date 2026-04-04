@@ -3,7 +3,7 @@ import { redisConnection } from "./connection";
 import { prisma } from "../utils/prisma";
 
 export const billingQueue = new Queue("billing", {
-  connection: redisConnection,
+  connection: redisConnection.connection,
 });
 
 // Worker to process billing jobs
@@ -90,6 +90,6 @@ new Worker(
     }
   },
   {
-    connection: redisConnection,
+  connection: redisConnection.connection,
   }
 );

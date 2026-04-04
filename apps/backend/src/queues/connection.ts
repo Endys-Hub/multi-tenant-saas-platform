@@ -1,9 +1,6 @@
-import { RedisOptions } from "ioredis";
+import IORedis from "ioredis";
 
-export const redisConnection = {
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
-  tls: {}, // Upstash
-  maxRetriesPerRequest: null, // no crash
-};
+export const redisConnection = new IORedis(process.env.REDIS_URL!, {
+  maxRetriesPerRequest: null,
+  tls: {},
+});

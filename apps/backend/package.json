@@ -5,6 +5,8 @@
     "dev": "npm run prisma:generate && ts-node-dev src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "migrate": "prisma migrate deploy",
+    "postinstall": "prisma generate",
     "worker:email": "ts-node src/workers/email.worker.ts",
     "worker:billing": "ts-node src/workers/billing.worker.ts"
   },

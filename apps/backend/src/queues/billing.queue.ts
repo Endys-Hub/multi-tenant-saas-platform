@@ -3,11 +3,10 @@ import { redisConnection } from "./connection";
 import { prisma } from "../utils/prisma";
 
 export const billingQueue = new Queue("billing", {
-  connection: redisConnection.connection,
+  connection: redisConnection,
 });
 
 // Worker to process billing jobs
-
 new Worker(
   "billing",
   async (job) => {
@@ -59,7 +58,7 @@ new Worker(
         await prisma.subscription.update({
           where: { organizationId: subscription.organizationId },
           data: {
-            status: "CANCELED", //
+            status: "CANCELED",
           },
         });
 
@@ -90,6 +89,6 @@ new Worker(
     }
   },
   {
-  connection: redisConnection.connection,
+    connection: redisConnection,
   }
 );

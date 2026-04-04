@@ -13,7 +13,7 @@ export const buildApp = () => {
   });
 
   app.register(cors as any, {
-    origin: true,
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Authorization", "Content-Type", "X-Organization-Id"],
   });

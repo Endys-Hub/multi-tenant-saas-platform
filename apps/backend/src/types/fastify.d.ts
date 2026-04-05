@@ -1,5 +1,4 @@
 import "fastify";
-import "@fastify/jwt";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -8,11 +7,6 @@ declare module "fastify" {
       organizationId: string;
       role: string;
     };
-    jwt: any;
-  }
-
-  interface FastifyInstance {
-    jwt: any;
   }
 }
 

@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../../utils/prisma";
 import { hashPassword, verifyPassword } from "../../utils/password";
 import { logAudit } from "../../utils/audit";
+import { FastifyInstance } from "fastify";
 
 export const signup = async (
   email: string,
@@ -56,36 +57,46 @@ export const signup = async (
   return result;
 };
 
-export const login = async (email: string, password: string) => {
-  console.log("LOGIN ATTEMPT");
-  console.log("Email:", email);
-
+export const login = async (
+  app: FastifyInstance,
+  email: string,
+  password: string
+) => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
-  console.log("User found:", user);
-
   if (!user) {
-    console.log("No user found");
     throw new Error("Invalid credentials");
   }
-
-  console.log("Input password:", password);
-  console.log("Stored hash:", user.password);
 
   const valid = await verifyPassword(password, user.password);
 
-  console.log("Password valid:", valid);
-
   if (!valid) {
-    console.log("Password mismatch");
     throw new Error("Invalid credentials");
   }
 
-  console.log("Login successful");
+  const membership = await prisma.membership.findFirst({
+    where: { userId: user.id },
+  });
 
-  return user;
+  if (!membership) {
+    throw new Error("User has no organization");
+  }
+
+  // Type FIX
+  const token = (app.jwt as any).sign({
+    userId: user.id,
+    organizationId: membership.organizationId,
+    role: membership.role,
+  });
+
+  return {
+    token,
+    organizationId: membership.organizationId,
+    role: membership.role,
+    userId: user.id,
+  };
 };
 
 

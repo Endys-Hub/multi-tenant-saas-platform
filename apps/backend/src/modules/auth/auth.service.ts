@@ -38,7 +38,7 @@ export const signup = async (
           organizationId: organization.id,
           plan: "FREE",
           status: "TRIALING",
-          trialEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14), // 14 days
+          trialEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14),
         },
       });
 
@@ -57,19 +57,33 @@ export const signup = async (
 };
 
 export const login = async (email: string, password: string) => {
+  console.log("LOGIN ATTEMPT");
+  console.log("Email:", email);
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
+  console.log("User found:", user);
+
   if (!user) {
+    console.log("No user found");
     throw new Error("Invalid credentials");
   }
+
+  console.log("Input password:", password);
+  console.log("Stored hash:", user.password);
 
   const valid = await verifyPassword(password, user.password);
 
+  console.log("Password valid:", valid);
+
   if (!valid) {
+    console.log("Password mismatch");
     throw new Error("Invalid credentials");
   }
+
+  console.log("Login successful");
 
   return user;
 };
